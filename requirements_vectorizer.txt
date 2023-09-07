@@ -1,0 +1,9 @@
+# For openai_api models
+openai
+
+# For bert_cls model
+transformers
+sentencepiece
+
+# For sbert model
+sentence_transformers

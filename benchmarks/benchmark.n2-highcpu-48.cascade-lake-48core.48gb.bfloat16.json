@@ -1,0 +1,13 @@
+{
+ "v0016.safetensors": {
+  "cpu": {
+   "vectors.shape": "torch.Size([13046560, 768])",
+   "vectors.dtype": "torch.bfloat16",
+   "load_file(break_in=False)": 0.0033907580000231974,
+   "break-in scan": 45.508442186000025,
+   "score()": 0.209137338000005,
+   "search()": 0.9160256016666987,
+   "search(target_ids)": 1.160780667000002
+  }
+ }
+}

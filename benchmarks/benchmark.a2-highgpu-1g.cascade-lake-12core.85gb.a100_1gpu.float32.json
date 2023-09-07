@@ -1,0 +1,13 @@
+{
+ "v0016_float32.safetensors": {
+  "cuda:0": {
+   "vectors.shape": "torch.Size([13046560, 768])",
+   "vectors.dtype": "torch.float32",
+   "load_file(break_in=False)": 21.880536000000006,
+   "break-in scan": 2.7056584910000083,
+   "score()": 0.00024726766666087013,
+   "search()": 0.0005958640000092904,
+   "search(target_ids)": 0.6970130956666859
+  }
+ }
+}

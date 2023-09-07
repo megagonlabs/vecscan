@@ -1,0 +1,13 @@
+{
+ "data/sentvecs.bert_v0016_irte_jrte-2.safetensors": {
+  "mps": {
+   "vectors.shape": "torch.Size([13046560, 768])",
+   "vectors.dtype": "torch.float32",
+   "load_file(break_in=False)": 74.66531125,
+   "break-in scan": 1.4539610829999958,
+   "score()": 0.0015727359999999635,
+   "search()": 0.002030013999998914,
+   "search(target_ids)": 0.27350169433332877
+  }
+ }
+}

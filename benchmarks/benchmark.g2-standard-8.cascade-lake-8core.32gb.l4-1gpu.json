@@ -1,0 +1,22 @@
+{
+ "v0016.safetensors": {
+  "cpu": {
+   "vectors.shape": "torch.Size([13046560, 768])",
+   "vectors.dtype": "torch.bfloat16",
+   "load_file(break_in=False)": 0.0009958800001186319,
+   "break-in scan": 0.8691747769998983,
+   "score()": 0.6392794810002064,
+   "search()": 1.4868684056664279,
+   "search(target_ids)": 1.7387890643334079
+  },
+  "cuda:0": {
+   "vectors.shape": "torch.Size([13046560, 768])",
+   "vectors.dtype": "torch.bfloat16",
+   "load_file(break_in=False)": 6.70068455100045,
+   "break-in scan": 1.1892320090000794,
+   "score()": 0.00026569966667011613,
+   "search()": 0.0005255266666305639,
+   "search(target_ids)": 0.6950071996667854
+  }
+ }
+}
