@@ -20,7 +20,7 @@ setup(
     ],
     license="MIT",
     name="vecscan",
-    packages=find_packages(include=["vecscan"]),
+    packages=["vecscan", "vecscan/vector_loader", "vecscan/vectorizer"],
     url="https://github.com/megagonlabs/vecscan",
-    version='2.0.0',
+    version='2.0.1',
 )

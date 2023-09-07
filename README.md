@@ -353,7 +353,7 @@ Output safetensors for `float16` (for mps or cuda):
 $ convert_to_safetensors -f csv -o sample.csv.safetensors --safetensors_dtype float16 < sample.csv
 ```
 
-IF CSV has a title row:
+If CSV has a title row:
 
 ```console
 $ convert_to_safetensors -f csv -o sample.csv.safetensors --skip_first_line < sample.csv
