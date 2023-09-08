@@ -5,9 +5,9 @@
 
 The vecscan is a dense vector search engine that performs similarity search for embedding databases in linear and greedy way by using the SIMDs (such as AVX2, AVX512, or AMX), CUDA, or MPS through PyTorch. (Note that using a GPU is super fast, but not required, and modern CPUs are more cost effective.)
 
-The vecscan employs simple linear-scan based algorithms, and it does not cause quantization errors that tend to be a problem with approximate neighborhood searches like `faiss`. The vecscan makes it very easy to build your vector search applications.
+The vecscan employs simple linear-scan based algorithms, and it does not cause quantization errors that tend to be a problem with approximate neighborhood searches like [faiss](https://github.com/facebookresearch/faiss). The vecscan makes it very easy to build your vector search applications.
 
-In vecscan, the default dtype of embedding vectors is `torch.bfloat16` (you can use `torch.float16` for Apple's MPS and CUDA devices, or `torch.float32` for any devices instead), and the file format of embedding database is `safetensors`. The embedding database, which holds 1 million records of 768-dimensional bfloat16 or float16 vectors, occupies 1.5GB of main memory (or GPU memory). If you're using 8x Sapphire Rapids vCPUs, `VectorScanner.search()` will take only 0.1[sec] for similarity score calculation and sorting (1M-records, 768-dim, bfloat16). The benchmarks for major CPUs and GPUs can be found in [Benchmarks](#benchmarks) section.
+In vecscan, the default dtype of embedding vectors is `torch.bfloat16` (you can use `torch.float16` for Apple's MPS and CUDA devices, or `torch.float32` for any devices instead), and the file format of embedding database is [safetensors](https://github.com/huggingface/safetensors). The embedding database, which holds 1 million records of 768-dimensional bfloat16 or float16 vectors, occupies 1.5GB of main memory (or GPU memory). If you're using 8x [Sapphire Rapids](https://www.intel.com/content/www/us/en/products/docs/processors/xeon-accelerated/4th-gen-xeon-scalable-processors.html) vCPUs, `VectorScanner.search()` will take only 0.1[sec] for similarity score calculation and sorting (1M-records, 768-dim, bfloat16). The benchmarks for major CPUs and GPUs can be found in [Benchmarks](#benchmarks) section.
 
 ### Recommended Environment
 
@@ -64,20 +64,22 @@ $ pip install -U torch --index-url https://download.pytorch.org/whl/cu118
 The latency and the throughput of `VectorScanner.search()` fully depend on the total FLOPs of the processors.
 We recommend you to use the latest XEON platform (such as GCP C3 instance which supports AMX), a MPS device, or a CUDA GPU device (such as NVIDIA L4) with enough memory to load entire safetensors vector file.
 
-If you're using the OpenAI API for embedding, you need to install `openai` package and set your api key to the environmental variable beforehand. See [Embedding Examples](#embed-text-by-openais-text-embedding-ada-002) section for details.
+If you're using the [OpenAI API](https://platform.openai.com/docs/guides/embeddings/what-are-embeddings) for embedding, you need to install `openai` package and set your api key to the environmental variable beforehand. See [Embedding Examples](#embed-text-by-openais-text-embedding-ada-002) section for details.
 
 ```Python
 from vecscan import VectorScanner, Vectorizer
 
 # load safetensors file
 scanner = VectorScanner.load_file("path_to_safetensors")
-# for Apple MPS:
+# for Apple MPS or CUDA devices:
 # scanner = VectorScanner.load_file("path_to_safetensors", device="mps")
+# scanner = VectorScanner.load_file("path_to_safetensors", device="cuda")
 
 # use OpenAI's text-embedding-ada-002 with the environmental variable "OPENAI_API_KEY" 
 vectorizer = Vectorizer.create(vectorizer_type="openai_api", model_path="text-embedding-ada-002")
-# for float16:
+# for float16 or float32:
 # vectorizer = Vectorizer.create(vectorizer_type="openai_api", model_path="text-embedding-ada-002", vec_dtype="float16")
+# vectorizer = Vectorizer.create(vectorizer_type="openai_api", model_path="text-embedding-ada-002", vec_dtype="float32")
 
 # get query embedding
 query_vec = vectorizer.vectorize(["some query text"])[0]
