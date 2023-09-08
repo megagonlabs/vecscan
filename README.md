@@ -62,7 +62,7 @@ $ pip install -U torch --index-url https://download.pytorch.org/whl/cu118
 ### How to Search
 
 The latency and the throughput of `VectorScanner.search()` fully depend on the total FLOPs of the processors.
-We recommend you to use the latest XEON platform (such as GCP C3 instance which supports AMX), a MPS device, or a CUDA GPU device (such as NVIDIA L4) with enough memory to load entire safetensors vector file.
+We recommend you to use the latest XEON platform (such as [GCP C3 instance](https://cloud.google.com/compute/docs/general-purpose-machines#c3_series) which supports AMX), a Apple MPS device, or a CUDA GPU device (such as [NVIDIA L4](https://cloud.google.com/compute/docs/gpus#l4-gpus)) with enough memory to load entire safetensors vector file.
 
 If you're using the [OpenAI API](https://platform.openai.com/docs/guides/embeddings/what-are-embeddings) for embedding, you need to install `openai` package and set your api key to the environmental variable beforehand. See [Embedding Examples](#embed-text-by-openais-text-embedding-ada-002) section for details.
 
