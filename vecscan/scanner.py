@@ -203,7 +203,7 @@ class VectorScanner:
         Args:
             path (str): path for safetensors file to load
             device (str): a device to load vectors (typically `cpu`, `cuda`, or `mps`)
-                - default: "mps" for Apple environmen, "cuda" for CUDA environment, or "cpu" for others
+                - default: "mps" for Apple environment, "cuda" for CUDA environment, or "cpu" for others
             normalize (bool): normalize the norm of each vector if True
             break_in (bool): execute break-in run after loading entire vectors
         Returns:
