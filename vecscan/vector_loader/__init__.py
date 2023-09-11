@@ -8,7 +8,7 @@ import numpy
 import torch
 from torch import Tensor
 
-from .. import VectorScanner, ARCHITECTURE_DEFAULT_DTYPE
+from .. import VectorScanner
 
 
 logger = logging.getLogger("vecscan")
@@ -22,13 +22,13 @@ class VectorLoader:
         normalize (bool): normalize all the vectors to have |v|=1 if True
             - default: False
         safetensors_dtype (Any): dtype of output Tensor instances
-            - default: "float16" for MPS, "bfloat16" for others
+            - default: "bfloat16"
         shard_size (int): maximum size of each shard in safetensors file
             - default: `2**32` (in byte)
         kwargs: keyword arguments for `VectorLoader` implementation class
     """
     @classmethod
-    def create(cls, input_format: str, vec_dim: Optional[int]=None, normalize: bool=False, safetensors_dtype: Any=ARCHITECTURE_DEFAULT_DTYPE, shard_size: int=2**32, **kwargs):
+    def create(cls, input_format: str, vec_dim: Optional[int]=None, normalize: bool=False, safetensors_dtype: Any="bfloat16", shard_size: int=2**32, **kwargs):
         """Create an instance of VectorLoader implementation class
         Args:
             input_format (str): a value in [`csv`, `jsonl`, `binary`]
@@ -37,7 +37,7 @@ class VectorLoader:
             normalize (bool): normalize all the vectors to have |v|=1 if True
                 - default: False
             safetensors_dtype (Any): dtype of output Tensor instances
-                - default: "float16" for MPS, "bfloat16" for others
+                - default: "bfloat16"
             shard_size (int): maximum size of each shard in safetensors file
                 - default: `2**32` (in byte)
             kwargs: keyword arguments for `VectorLoader` implementation class
@@ -58,7 +58,7 @@ class VectorLoader:
         )
         return vector_loader
 
-    def __init__(self, vec_dim: Optional[int]=None, normalize: bool=False, safetensors_dtype: Any=ARCHITECTURE_DEFAULT_DTYPE, shard_size: int=2**32, **kwargs):
+    def __init__(self, vec_dim: Optional[int]=None, normalize: bool=False, safetensors_dtype: Any="bfloat16", shard_size: int=2**32, **kwargs):
         self.vec_dim = vec_dim
         self.safetensors_dtype = getattr(torch, safetensors_dtype) if isinstance(safetensors_dtype, str) else safetensors_dtype
         self.normalize = normalize
@@ -80,7 +80,7 @@ class VectorLoader:
         scanner = VectorScanner(shards)
         return scanner
 
-    def load_shard(self) -> Optional[Tensor]:
+    def load_shard(self, fin: IO=sys.stdin) -> Optional[Tensor]:
         """Prototype method for loading single shard from input
         Returns:
             Optional[Tensor]: a Tensor instance if one or more records exists, None for end of file
@@ -92,15 +92,17 @@ class CsvVectorLoader(VectorLoader):
     def __init__(self, skip_first_line: bool=False, **kwargs):
         super().__init__(**kwargs)
         self.skip_first_line = skip_first_line
+        self.first_line_skipped = False
         logger.debug(f"CsvVectorLoader: vec_dim={self.vec_dim}, safetensors_dtype={self.safetensors_dtype}, skip_first_line={self.skip_first_line}")
-        if self.skip_first_line:
-            line = sys.stdin.readline().strip('" \n')
-            logger.info(f"skip first line: {line}")
 
-    def load_shard(self) -> Optional[Tensor]:
+    def load_shard(self, fin: IO=sys.stdin) -> Optional[Tensor]:
+        if self.skip_first_line and not self.first_line_skipped:
+            line = fin.readline().strip('" \n')
+            self.first_line_skipped = True
+            logger.info(f"skip first line: {line}")
         vectors = []
         while True:
-            line = sys.stdin.readline()
+            line = fin.readline()
             if not line:
                 break
             target = [float(_) for _ in re.split(r'"? *, *"?', line.rstrip("\n"))]
@@ -129,10 +131,10 @@ class JsonlVectorLoader(VectorLoader):
         self.target_field = target_field
         logger.debug(f"JsonlVectorLoader: vec_dim={self.vec_dim}, target_field={self.target_field}, safetensors_dtype={self.safetensors_dtype}")
 
-    def load_shard(self) -> Optional[Tensor]:
+    def load_shard(self, fin: IO=sys.stdin) -> Optional[Tensor]:
         vectors = []
         while True:
-            line = sys.stdin.readline()
+            line = fin.readline()
             if not line:
                 break
             record = json.loads(line)
@@ -162,15 +164,16 @@ class JsonlVectorLoader(VectorLoader):
 class BinaryVectorLoader(VectorLoader):
     def __init__(self, input_dtype: str="float32", **kwargs):
         super().__init__(**kwargs)
+        assert isinstance(self.vec_dim, int), "specify vec_dim with int value"
         self.input_dtype = getattr(numpy, input_dtype) if isinstance(input_dtype, str) else input_dtype
         self.max_records_in_shard = _max_records_in_shard(self.vec_dim, self.safetensors_dtype, self.shard_size)
         logger.debug(f"BinaryVectorLoader: vec_dim={self.vec_dim}, input_dtype={self.input_dtype}, safetensors_dtype={self.safetensors_dtype}")
 
-    def load_shard(self) -> Optional[Tensor]:
+    def load_shard(self, fin: IO=sys.stdin.buffer) -> Optional[Tensor]:
         if self.max_records_in_shard > 0:
-            nparray = numpy.fromfile(sys.stdin.buffer, self.input_dtype, self.max_records_in_shard * self.vec_dim)
+            nparray = numpy.fromfile(fin, self.input_dtype, self.max_records_in_shard * self.vec_dim)
         else:
-            nparray = numpy.fromfile(sys.stdin.buffer, self.input_dtype)
+            nparray = numpy.fromfile(fin, self.input_dtype)
         if len(nparray) > 0:
             shard = torch.tensor(nparray, dtype=self.safetensors_dtype).reshape(-1, self.vec_dim)
             if self.normalize:

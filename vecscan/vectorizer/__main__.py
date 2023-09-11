@@ -4,10 +4,8 @@ import logging
 import os
 import sys
 
-import torch
-
-from . import Vectorizer, ARCHITECTURE_DEFAULT_DTYPE
-from .. import convert_vec_to_safetensors
+from . import Vectorizer
+from .. import ARCHITECTURE_DEFAULT_DTYPE, VectorLoader
 
 
 logger = logging.getLogger("vescan")
@@ -63,8 +61,16 @@ def main():
 
     vec_dim = vectorizer.vec_dim
     vectorizer = None
-    logger.info(f"convert to safetensors for {args.safetensors_dtype}: {output_safetensors_path}")
-    convert_vec_to_safetensors(output_vec_path, vec_dim, args.vec_dtype, args.safetensors_dtype, output_safetensors_path)
+    logger.info(f"convert to safetensors in {args.safetensors_dtype}: {output_safetensors_path}")
+    vector_loader = VectorLoader.create(
+        input_format="binary",
+        vec_dim=vec_dim,
+        input_dtype=args.vec_dtype,
+        safetensors_dtype=args.safetensors_dtype,
+    )
+    with open(output_vec_path, "rb") as fin:
+        scanner = vector_loader.create_vector_scanner(fin)
+    scanner.save_file(output_safetensors_path)
     logger.info("convert finished")
     if args.remove_vec_file:
         os.remove(output_vec_path)

@@ -1,7 +1,8 @@
 import argparse
 import logging
 
-from . import VectorLoader, ARCHITECTURE_DEFAULT_DTYPE
+from . import VectorLoader
+from .. import ARCHITECTURE_DEFAULT_DTYPE
 
 
 logger = logging.getLogger("vecscan")
