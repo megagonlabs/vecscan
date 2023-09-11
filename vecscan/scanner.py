@@ -206,7 +206,7 @@ class VectorScanner:
         Returns:
             VectorScanner: new VectorScanner instance
         """
-        device = assign_device(device)
+        device = VectorScanner._assign_device(device)
         logger.debug(f"start load_file(): {path=}, {device=}, {normalize=}, {break_in=}")
         tensors = safetensors.torch.load_file(path, device=device)
         num_shards = tensors[SAFETENSORS_NUM_SHARDS_FIELD]
@@ -219,11 +219,13 @@ class VectorScanner:
         logger.debug(f"end   load_file(): {_info(shards)}")
         return VectorScanner(shards)
 
-
-def assign_device(device: str) -> str:
-    if device is not None:
-        return device
-    elif torch.cuda.is_available():
-        return "cuda:0" 
-    else:
-        return "cpu"
+    @staticmethod
+    def _assign_device(device: str) -> str:
+        if device is not None:
+            return device
+        elif torch.cuda.is_available():
+            return "cuda" 
+        elif torch.backends.mps.is_available():
+            return "mps" 
+        else:
+            return "cpu"

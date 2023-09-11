@@ -9,6 +9,8 @@ import tqdm
 import torch
 from safetensors.torch import _tobytes
 
+from .. import ARCHITECTURE_DEFAULT_DTYPE
+
 
 logger = logging.getLogger("vecscan")
 
@@ -21,17 +23,17 @@ class Vectorizer:
         batch_size (int): batch size
         vec_dim (int): vector dimension
         vec_dtype (str): dtype string of output Tensor
-            - default: `bfloat16`
+            - default: "float16" for MPS, "bfloat16" for others
         kwargs: not used
     """
     @classmethod
-    def create(cls, vectorizer_type: str, model_path: str, vec_dtype: str="bfloat16", **kwargs):
+    def create(cls, vectorizer_type: str, model_path: str, vec_dtype: str=ARCHITECTURE_DEFAULT_DTYPE, **kwargs):
         """Create an instance of Vectorizer implementation class
         Args:
             vectorizer_type (str): a value in [`openai_api`, `bert_cls`, `sbert`]
             model_path (str): path for the model directory or model name in API
             vec_dtype (str): dtype string of output Tensor
-                - default: `bfloat16`
+                - default: "float16" for MPS, "bfloat16" for others
             kwargs: keyword arguments for each Vectorizer implementation class
         Returns:
             Vectorizer: new instance of Vectorizer implementation class
@@ -50,7 +52,7 @@ class Vectorizer:
         model_path: str,
         batch_size: int,
         vec_dim: int,
-        vec_dtype: str="bfloat16",
+        vec_dtype: str=ARCHITECTURE_DEFAULT_DTYPE,
         device: Union[str, torch.device]=None,
         **kwargs,
     ):

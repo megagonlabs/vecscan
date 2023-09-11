@@ -4,7 +4,9 @@ import logging
 import os
 import sys
 
-from . import Vectorizer
+import torch
+
+from . import Vectorizer, ARCHITECTURE_DEFAULT_DTYPE
 from .. import convert_vec_to_safetensors
 
 
@@ -17,7 +19,7 @@ def parse_args():
     parser.add_argument("-t", "--vectorizer_type", choices=["openai_api", "bert_cls", "sbert"], required=True)
     parser.add_argument("-m", "--model_path", required=True)
     parser.add_argument("--vec_dtype", type=str, default="float32")
-    parser.add_argument("--safetensors_dtype", type=str, default="bfloat16")
+    parser.add_argument("--safetensors_dtype", type=str, default=ARCHITECTURE_DEFAULT_DTYPE)
     parser.add_argument("-r", "--remove_vec_file", action="store_true", default=False)
     parser.add_argument("--batch_size", type=int, default=None)
     parser.add_argument("--vec_dim", type=int, default=None)

@@ -8,7 +8,7 @@ import numpy
 import torch
 from torch import Tensor
 
-from .. import VectorScanner
+from .. import VectorScanner, ARCHITECTURE_DEFAULT_DTYPE
 
 
 logger = logging.getLogger("vecscan")
@@ -22,13 +22,13 @@ class VectorLoader:
         normalize (bool): normalize all the vectors to have |v|=1 if True
             - default: False
         safetensors_dtype (Any): dtype of output Tensor instances
-            - default: "bfloat16"
+            - default: "float16" for MPS, "bfloat16" for others
         shard_size (int): maximum size of each shard in safetensors file
             - default: `2**32` (in byte)
         kwargs: keyword arguments for `VectorLoader` implementation class
     """
     @classmethod
-    def create(cls, input_format: str, vec_dim: Optional[int]=None, normalize: bool=False, safetensors_dtype: Any="bfloat16", shard_size: int=2**32, **kwargs):
+    def create(cls, input_format: str, vec_dim: Optional[int]=None, normalize: bool=False, safetensors_dtype: Any=ARCHITECTURE_DEFAULT_DTYPE, shard_size: int=2**32, **kwargs):
         """Create an instance of VectorLoader implementation class
         Args:
             input_format (str): a value in [`csv`, `jsonl`, `binary`]
@@ -37,7 +37,7 @@ class VectorLoader:
             normalize (bool): normalize all the vectors to have |v|=1 if True
                 - default: False
             safetensors_dtype (Any): dtype of output Tensor instances
-                - default: "bfloat16"
+                - default: "float16" for MPS, "bfloat16" for others
             shard_size (int): maximum size of each shard in safetensors file
                 - default: `2**32` (in byte)
             kwargs: keyword arguments for `VectorLoader` implementation class
@@ -58,7 +58,7 @@ class VectorLoader:
         )
         return vector_loader
 
-    def __init__(self, vec_dim: Optional[int]=None, normalize: bool=False, safetensors_dtype: Any="bfloat16", shard_size: int=2**32, **kwargs):
+    def __init__(self, vec_dim: Optional[int]=None, normalize: bool=False, safetensors_dtype: Any=ARCHITECTURE_DEFAULT_DTYPE, shard_size: int=2**32, **kwargs):
         self.vec_dim = vec_dim
         self.safetensors_dtype = getattr(torch, safetensors_dtype) if isinstance(safetensors_dtype, str) else safetensors_dtype
         self.normalize = normalize
