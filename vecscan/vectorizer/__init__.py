@@ -51,7 +51,7 @@ class Vectorizer:
         batch_size: int,
         vec_dim: int,
         vec_dtype: str="bfloat16",
-        device: Union[str, torch.device]=None,
+        device: Union[str, torch.device]="cpu",
         **kwargs,
     ):
         self.vectorizer_type = vectorizer_type
@@ -59,7 +59,8 @@ class Vectorizer:
         self.batch_size = batch_size
         self.vec_dim = vec_dim
         self.vec_dtype = getattr(torch, vec_dtype) if isinstance(vec_dtype, str) else vec_dtype
-        self.device = assign_device(device)
+        self.device = torch.device(device) if isinstance(device, str) else device
+
 
     def vectorize(self, batch: List[str]) -> torch.Tensor:
         """Prototype method for extracting embedding vectors
@@ -228,12 +229,3 @@ class VectorizerSBert(Vectorizer):
             if self.normalize:
                 batch_vectors = torch.nn.functional.normalize(batch_vectors)
             return batch_vectors.to(self.vec_dtype)
-
-
-def assign_device(device: Union[str, torch.device]) -> torch.device:
-    if device is None:
-        return torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    elif isinstance(device, str):
-        return torch.device(device)
-    else:
-        return device

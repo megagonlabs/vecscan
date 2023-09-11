@@ -6,6 +6,8 @@ import torch
 from torch import Tensor
 import safetensors
 
+from .utils import ARCHITECTURE_DEFAULT_DEVICE
+
 
 logger = logging.getLogger("vecscan")
 
@@ -196,17 +198,17 @@ class VectorScanner:
         logger.debug(f"end   save_file()")
 
     @classmethod
-    def load_file(cls, path: str, device: Optional[str]=None, normalize: bool = False, break_in: bool=True):
+    def load_file(cls, path: str, device: str=ARCHITECTURE_DEFAULT_DEVICE, normalize: bool = False, break_in: bool=True):
         """Create VectorScanner instance and load 2d tensors to `self.shards` from safetensors file
         Args:
             path (str): path for safetensors file to load
-            device (Optional[str]): a device to load vectors (typically `cpu`, `cuda`, or `mps`)
+            device (str): a device to load vectors (typically `cpu`, `cuda`, or `mps`)
+                - default: "mps" for Apple environmen, "cuda" for CUDA environment, or "cpu" for others
             normalize (bool): normalize the norm of each vector if True
             break_in (bool): execute break-in run after loading entire vectors
         Returns:
             VectorScanner: new VectorScanner instance
         """
-        device = assign_device(device)
         logger.debug(f"start load_file(): {path=}, {device=}, {normalize=}, {break_in=}")
         tensors = safetensors.torch.load_file(path, device=device)
         num_shards = tensors[SAFETENSORS_NUM_SHARDS_FIELD]
@@ -218,12 +220,3 @@ class VectorScanner:
                 torch.mv(_, _[0])
         logger.debug(f"end   load_file(): {_info(shards)}")
         return VectorScanner(shards)
-
-
-def assign_device(device: str) -> str:
-    if device is not None:
-        return device
-    elif torch.cuda.is_available():
-        return "cuda:0" 
-    else:
-        return "cpu"

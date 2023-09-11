@@ -1,13 +1,21 @@
 # vecscan
 `vecscan`: A Linear-scan-based High-speed Dense Vector Search Engine
 
+## What's New
+
+- 2023.09.11 - Release v2.1.0
+  - new features:
+    - use `float16` as default dtype and `mps` as default device for Apple's MPS environment
+  - bug fixes:
+    - fix import problem in vectorizer
+
 ## Introduction
 
 The vecscan is a dense vector search engine that performs similarity search for embedding databases in linear and greedy way by using the SIMDs (such as AVX2, AVX512, or AMX), CUDA, or MPS through PyTorch. (Note that using a GPU is super fast, but not required, and modern CPUs are more cost effective.)
 
 The vecscan employs simple linear-scan based algorithms, and it does not cause quantization errors that tend to be a problem with approximate neighborhood searches like [faiss](https://github.com/facebookresearch/faiss). The vecscan makes it very easy to build your vector search applications.
 
-In vecscan, the default dtype of embedding vectors is `torch.bfloat16` (you can use `torch.float16` for Apple's MPS and CUDA devices, or `torch.float32` for any devices instead), and the file format of embedding database is [safetensors](https://github.com/huggingface/safetensors). The embedding database, which holds 1 million records of 768-dimensional bfloat16 or float16 vectors, occupies 1.5GB of main memory (or GPU memory). If you're using 8x [Sapphire Rapids](https://www.intel.com/content/www/us/en/products/docs/processors/xeon-accelerated/4th-gen-xeon-scalable-processors.html) vCPUs, `VectorScanner.search()` will take only 0.1[sec] for similarity score calculation and sorting (1M-records, 768-dim, bfloat16). The benchmarks for major CPUs and GPUs can be found in [Benchmarks](#benchmarks) section.
+In vecscan, the default dtype of embedding vectors is "float16" for MPS, "bfloat16" for others (you can use `torch.float32` for all the devices instead), and the file format of embedding database is [safetensors](https://github.com/huggingface/safetensors). The embedding database, which holds 1 million records of 768-dimensional bfloat16 or float16 vectors, occupies 1.5GB of main memory (or GPU memory). If you're using 8x [Sapphire Rapids](https://www.intel.com/content/www/us/en/products/docs/processors/xeon-accelerated/4th-gen-xeon-scalable-processors.html) vCPUs, `VectorScanner.search()` will take only 0.1[sec] for similarity score calculation and sorting (1M-records, 768-dim, bfloat16). The benchmarks for major CPUs and GPUs can be found in [Benchmarks](#benchmarks) section.
 
 ### Recommended Environment
 
@@ -132,11 +140,12 @@ from vecscan import VectorScanner
 
 #### Class Method
 
-- `VectorScanner.load_file(cls, path, device=None, normalize=False, break_in=True)`
+- `VectorScanner.load_file(cls, path, device, normalize=False, break_in=True)`
   - Create VectorScanner instance and load 2d tensors to `self.shards` from safetensors file
   - Args:
     - path (str): path for safetensors file to load
-    - device (Optional[str]): a device to load vectors (typically `cpu`, `cuda`, or `mps`)
+    - device (str): a device to load vectors (typically `cpu`, `cuda`, or `mps`)
+      - default: "mps" for Apple environmen, "cuda" for CUDA environment, or "cpu" for others
     - normalize (bool): normalize the norm of each vector if True
     - break_in (bool): execute break-in run after loading entire vectors
   - Returns:
@@ -283,12 +292,16 @@ from vecscan import VectorLoader
     - shard_size (int): maximum size of each shard in safetensors file
       - default: `2**32` (in byte)
     - kwargs: keyword arguments for `VectorLoader` implementation class
-- `create_vector_scanner(self)`
-  - Creates a `VectorScanner` instance using the Tensor read from the input.
+- `create_vector_scanner(self, fin)`
+  - Creates a `VectorScanner` instance from given input file.
+  - Args:
+    - fin (IO): input file
   - Returns:
     - VectorScanner: new `VectorScanner` instance
-- `load_shard(self)`
-  - Prototype method for loading single shard from input
+- `load_shard(self, fin)`
+  - Prototype method for loading single shard from input file
+  - Args:
+    - fin (IO): input file
   - Returns:
     - Optional[Tensor]: a Tensor instance if one or more records exists, None for end of file
 

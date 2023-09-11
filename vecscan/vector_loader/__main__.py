@@ -1,7 +1,9 @@
 import argparse
 import logging
+import sys
 
 from . import VectorLoader
+from ..utils import ARCHITECTURE_DEFAULT_DTYPE
 
 
 logger = logging.getLogger("vecscan")
@@ -16,7 +18,7 @@ def parse_args():
     parser.add_argument("-s", "--skip_first_line", action="store_true", default=False)
     parser.add_argument("-t", "--target_field", type=str, default=None)
     parser.add_argument("--input_dtype", type=str, default="float32")
-    parser.add_argument("--safetensors_dtype", type=str, default="bfloat16")
+    parser.add_argument("--safetensors_dtype", type=str, default=ARCHITECTURE_DEFAULT_DTYPE)
     parser.add_argument("--shard_size", type=int, default=2**32)
     parser.add_argument("-v", "--verbose", action="store_true", default=False)
     return parser.parse_args()
@@ -39,7 +41,7 @@ def main():
         safetensors_dtype=args.safetensors_dtype,
         shard_size=args.shard_size,
     )
-    scanner = vector_loader.create_vector_scanner()
+    scanner = vector_loader.create_vector_scanner(sys.stdin)
     scanner.save_file(args.output_safetensors_path)
     logger.info(f"{len(scanner)} records converted")
 
