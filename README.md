@@ -283,12 +283,16 @@ from vecscan import VectorLoader
     - shard_size (int): maximum size of each shard in safetensors file
       - default: `2**32` (in byte)
     - kwargs: keyword arguments for `VectorLoader` implementation class
-- `create_vector_scanner(self)`
-  - Creates a `VectorScanner` instance using the Tensor read from the input.
+- `create_vector_scanner(self, fin)`
+  - Creates a `VectorScanner` instance from given input file.
+  - Args:
+    - fin (IO): input file
   - Returns:
     - VectorScanner: new `VectorScanner` instance
-- `load_shard(self)`
-  - Prototype method for loading single shard from input
+- `load_shard(self, fin)`
+  - Prototype method for loading single shard from input file
+  - Args:
+    - fin (IO): input file
   - Returns:
     - Optional[Tensor]: a Tensor instance if one or more records exists, None for end of file
 

@@ -66,22 +66,26 @@ class VectorLoader:
         self.max_records_in_shard = None
         self.file: IO = None
 
-    def create_vector_scanner(self) -> VectorScanner:
-        """Creates a `VectorScanner` instance using the Tensor read from the input.
+    def create_vector_scanner(self, fin: IO) -> VectorScanner:
+        """Creates a `VectorScanner` instance from given input file.
+        Args:
+            fin (IO): input file
         Returns:
             VectorScanner: new `VectorScanner` instance
         """
         shards = []
         while True:
-            shard = self.load_shard()
+            shard = self.load_shard(fin)
             if shard is None:
                 break
             shards.append(shard)
         scanner = VectorScanner(shards)
         return scanner
 
-    def load_shard(self, fin: IO=sys.stdin) -> Optional[Tensor]:
-        """Prototype method for loading single shard from input
+    def load_shard(self, fin: IO) -> Optional[Tensor]:
+        """Prototype method for loading single shard from input file
+        Args:
+            fin (IO): input file
         Returns:
             Optional[Tensor]: a Tensor instance if one or more records exists, None for end of file
         """
@@ -95,7 +99,7 @@ class CsvVectorLoader(VectorLoader):
         self.first_line_skipped = False
         logger.debug(f"CsvVectorLoader: vec_dim={self.vec_dim}, safetensors_dtype={self.safetensors_dtype}, skip_first_line={self.skip_first_line}")
 
-    def load_shard(self, fin: IO=sys.stdin) -> Optional[Tensor]:
+    def load_shard(self, fin: IO) -> Optional[Tensor]:
         if self.skip_first_line and not self.first_line_skipped:
             line = fin.readline().strip('" \n')
             self.first_line_skipped = True
@@ -131,7 +135,7 @@ class JsonlVectorLoader(VectorLoader):
         self.target_field = target_field
         logger.debug(f"JsonlVectorLoader: vec_dim={self.vec_dim}, target_field={self.target_field}, safetensors_dtype={self.safetensors_dtype}")
 
-    def load_shard(self, fin: IO=sys.stdin) -> Optional[Tensor]:
+    def load_shard(self, fin: IO) -> Optional[Tensor]:
         vectors = []
         while True:
             line = fin.readline()
@@ -169,7 +173,7 @@ class BinaryVectorLoader(VectorLoader):
         self.max_records_in_shard = _max_records_in_shard(self.vec_dim, self.safetensors_dtype, self.shard_size)
         logger.debug(f"BinaryVectorLoader: vec_dim={self.vec_dim}, input_dtype={self.input_dtype}, safetensors_dtype={self.safetensors_dtype}")
 
-    def load_shard(self, fin: IO=sys.stdin.buffer) -> Optional[Tensor]:
+    def load_shard(self, fin: IO) -> Optional[Tensor]:
         if self.max_records_in_shard > 0:
             nparray = numpy.fromfile(fin, self.input_dtype, self.max_records_in_shard * self.vec_dim)
         else:

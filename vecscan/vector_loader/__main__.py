@@ -1,5 +1,6 @@
 import argparse
 import logging
+import sys
 
 from . import VectorLoader
 from .. import ARCHITECTURE_DEFAULT_DTYPE
@@ -40,7 +41,7 @@ def main():
         safetensors_dtype=args.safetensors_dtype,
         shard_size=args.shard_size,
     )
-    scanner = vector_loader.create_vector_scanner()
+    scanner = vector_loader.create_vector_scanner(sys.stdin)
     scanner.save_file(args.output_safetensors_path)
     logger.info(f"{len(scanner)} records converted")
 
