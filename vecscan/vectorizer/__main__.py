@@ -5,7 +5,8 @@ import os
 import sys
 
 from . import Vectorizer
-from .. import ARCHITECTURE_DEFAULT_DTYPE, VectorLoader
+from .. import VectorLoader
+from ..utils import ARCHITECTURE_DEFAULT_DTYPE
 
 
 logger = logging.getLogger("vescan")
@@ -21,7 +22,7 @@ def parse_args():
     parser.add_argument("-r", "--remove_vec_file", action="store_true", default=False)
     parser.add_argument("--batch_size", type=int, default=None)
     parser.add_argument("--vec_dim", type=int, default=None)
-    parser.add_argument("--device", type=str, default=None)
+    parser.add_argument("--device", type=str, default="cpu")
     parser.add_argument("--max_retry", type=int, default=None)
     parser.add_argument("--max_length", type=int, default=None)
     parser.add_argument("--hidden_layer", type=int, default=None)

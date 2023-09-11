@@ -3,7 +3,7 @@ import logging
 import sys
 
 from . import VectorLoader
-from .. import ARCHITECTURE_DEFAULT_DTYPE
+from ..utils import ARCHITECTURE_DEFAULT_DTYPE
 
 
 logger = logging.getLogger("vecscan")

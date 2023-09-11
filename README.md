@@ -132,11 +132,12 @@ from vecscan import VectorScanner
 
 #### Class Method
 
-- `VectorScanner.load_file(cls, path, device=None, normalize=False, break_in=True)`
+- `VectorScanner.load_file(cls, path, device, normalize=False, break_in=True)`
   - Create VectorScanner instance and load 2d tensors to `self.shards` from safetensors file
   - Args:
     - path (str): path for safetensors file to load
-    - device (Optional[str]): a device to load vectors (typically `cpu`, `cuda`, or `mps`)
+    - device (str): a device to load vectors (typically `cpu`, `cuda`, or `mps`)
+      - default: "mps" for Apple environmen, "cuda" for CUDA environment, or "cpu" for others
     - normalize (bool): normalize the norm of each vector if True
     - break_in (bool): execute break-in run after loading entire vectors
   - Returns:
