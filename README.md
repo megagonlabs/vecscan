@@ -1,6 +1,14 @@
 # vecscan
 `vecscan`: A Linear-scan-based High-speed Dense Vector Search Engine
 
+## What's New
+
+- 2023.09.11 - Release v2.1.0
+  - new features:
+    - use `float16` as default dtype and `mps` as default device for Apple's MPS environment
+  - bug fixes:
+    - fix import problem in vectorizer
+
 ## Introduction
 
 The vecscan is a dense vector search engine that performs similarity search for embedding databases in linear and greedy way by using the SIMDs (such as AVX2, AVX512, or AMX), CUDA, or MPS through PyTorch. (Note that using a GPU is super fast, but not required, and modern CPUs are more cost effective.)
